@@ -1,3 +1,5 @@
+JWT_KEY = b977ffb4-0d99-4975-a42e-77bdb6774313
+
 #--------------------------------------------------------------------
 # Example Environment Configuration file
 #
