@@ -41,7 +41,7 @@ class JwtFilter implements FilterInterface
             return $response;
         }
         
-        $request->current_user = (object)[
+        $request->auth = (object)[
             'id' => $data->sub,
             'username' => $data->username
         ];

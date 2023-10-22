@@ -7,10 +7,22 @@ use App\Models\UserModel;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
+use Services\GameService;
+use Services\JwtService;
+use Services\UserService;
 
 class LoginController extends BaseController
 {
     use ResponseTrait;
+    
+    private GameService $gameService;
+    private UserService $userService;
+    
+    public function __construct()
+    {
+        $this->gameService = new GameService();
+        $this->userService = new UserService();
+    }
     
     public function login(): ResponseInterface
     {
@@ -27,10 +39,7 @@ class LoginController extends BaseController
                 'message' => 'Неверный логин или пароль'
             ], 400);
         }
-        $onlineUsersCount = $userModel->builder()
-                ->where('is_online', true)
-                ->where('last_online >', Time::now()->subMinutes(5))
-                ->countAllResults();
+        $onlineUsersCount = $this->userService->getOnlineUsersCount();
         if ($onlineUsersCount >= 2) {
             return $this->respond([
                 'message' => 'Достигнуто максимальное количество игроков. Зайдите позже.'
@@ -40,7 +49,9 @@ class LoginController extends BaseController
         $user->last_online = Time::now();
         $userModel->save($user);
         
-        $jwtService = new \Services\JwtService();
+        $this->gameService->passUserToGame($user);
+        
+        $jwtService = new JwtService();
         $tokens = $jwtService->generateJwtForUser($user);
         
         return $this->respond($tokens);
