@@ -18,7 +18,6 @@ class GameModel extends Model
         'cross',
         'zero',
         'winner',
-        'turn',
         'board',
         'status',
     ];

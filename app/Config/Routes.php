@@ -28,7 +28,11 @@ $routes->group('api', static function ($routes) {
             ['filter' => JwtFilter::class]
     );
     
-    
+    $routes->post(
+            'game/move',
+            [GameController::class, 'move'],
+            ['filter' => JwtFilter::class]
+    );
     
 });
 

@@ -24,8 +24,7 @@ class GameController extends BaseController
 
     public function status(): ResponseInterface
     {
-        $user = $this->userModel->first($this->request->auth);
-        return $this->respond($this->gameService->getGameStatusForUser($user));
+        return $this->respond($this->gameService->getGameStatusForUser($this->request->auth->id));
     }
     
     public function userInfo(): ResponseInterface
@@ -40,5 +39,23 @@ class GameController extends BaseController
             'defeats' => $user->defeats,
         ];
         return $this->respond($response);
+    }
+    
+    public function move(): ResponseInterface
+    {
+        $ceil = $request->ceil;
+        if ($ceil < 0 || $ceil > 8) {
+            return $this->respond([
+                'message' => 'Невалидный номер клетки'
+            ], 400);
+        }
+        try {
+            $gameStatus = $this->gameService->move($request->auth->id, $ceil);
+        } catch (\InvalidArgumentException $e) {
+            return $this->respond([
+                'message' => $e->getMessage()
+            ], 400);
+        }
+        return $this->respond($gameStatus);
     }
 }

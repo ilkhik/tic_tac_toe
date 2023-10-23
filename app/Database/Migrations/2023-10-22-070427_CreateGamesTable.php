@@ -33,10 +33,6 @@ class CreateGamesTable extends Migration
                 'unsigned' => true,
                 'null' => true
             ],
-            'turn' => [
-                'type' => 'varchar',
-                'constraint' => '6',
-            ],
             'board' => [
                 'type' => 'varchar',
                 'constraint' => '30',

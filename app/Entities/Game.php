@@ -9,7 +9,6 @@ use CodeIgniter\Entity\Entity;
  * @property int $cross
  * @property int $zero
  * @property ?int $winner
- * @property string $turn
  * @property string $board
  * @property string $status
  */
@@ -28,7 +27,4 @@ class Game extends Entity
     public const STATUS_CROSS_MOVE = 'cross_move';
     public const STATUS_ZERO_MOVE = 'zero_move';
     public const STATUS_GAME_OVER = 'game_over';
-    
-    public const TURN_CROSS = 'cross';
-    public const TURN_ZERO = 'zero';
 }
