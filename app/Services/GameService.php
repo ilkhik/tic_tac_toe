@@ -23,39 +23,39 @@ class GameService
     public function passUserToGame(User $user): void
     {
         $game = $this->gameModel
-                ->where('status', Game::STATUS_WAITING)
+                ->where('status <>', Game::STATUS_GAME_OVER)
                 ->orderBy('id', 'desc')
                 ->first();
         if (!$game) {
             $game = new Game();
             $game->cross = $user->id;
             $game->status = Game::STATUS_WAITING;
-            $board = [
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-            ];
+            $board = array_fill(0, 9, 0);
             $game->board = json_encode($board);
             $this->gameModel->save($game);
             return;
         }
         
-        if ($game->cross && !$game->zero) {
-            $enemy = $this->userModel->find($game->cross);
+        if ($game->status !== Game::STATUS_WAITING && 
+                ($game->cross === $user->id || $game->zero === $user->id)) {
+            return;
+        }
+        if ($game->status === Game::STATUS_WAITING) {
+            if ($game->cross === $user->id || $game->zero === $user->id) {
+                return;
+            }
+            
+            $enemySign = isset($game->cross) ? 'cross' : 'zero';
+            $mySign = isset($game->cross) ? 'zero' : 'cross';
+            $enemy = $this->userModel->find($game->$enemySign);
             
             if ( !$this->userService->isOnline($enemy) ) {
-                $game->cross = $user->id;
+                $game->$enemySign = $user->id;
                 $this->gameModel->save($game);
                 return;
             }
             
-            $game->zero = $user->id;
+            $game->$mySign = $user->id;
             $game->status = Game::STATUS_CROSS_MOVE;
             $this->gameModel->save($game);
             
@@ -65,7 +65,7 @@ class GameService
     
     public function getGameStatusForUser(int $userId)
     {
-        $user = $this->userModel->first($userId);
+        $user = $this->userModel->find($userId);
         $game = $this->gameModel->where("
                     status <> '" . Game::STATUS_GAME_OVER . "'
                     and
@@ -94,18 +94,22 @@ class GameService
         return $status;
     }
     
-    public function move(int $userId, int $ceil)
+    public function move(User $user, int $ceil)
     {
         $game = $this->gameModel->where("
-                    status <> '" . Game::STATUS_GAME_OVER . "'
+                    status not in ( '" . Game::STATUS_GAME_OVER . "', 
+                        '" . Game::STATUS_WAITING . "' )
                     and
-                    (cross = {$userId} or zero = {$userId})
+                    (cross = {$user->id} or zero = {$user->id})
                 ")
                 ->orderBy('id', 'desc')
                 ->first();
                     
-        if (    $game->status === Game::STATUS_CROSS_MOVE && $game->cross !== $userId ||
-                $game->status === Game::STATUS_ZERO_MOVE && $game->zero !== $userId
+        if (!$game) {
+            throw new \InvalidArgumentException('Игра не начата');
+        }
+        if (    $game->status === Game::STATUS_CROSS_MOVE && $game->cross !== $user->id ||
+                $game->status === Game::STATUS_ZERO_MOVE && $game->zero !== $user->id
             ) {
             throw new \InvalidArgumentException('Сейчас не ваш ход');
         }
@@ -114,11 +118,17 @@ class GameService
         if ($board[$ceil] !== 0) {
             throw new \InvalidArgumentException('Клетка занята');
         }
-        $currentSignCode = ($game->status === Game::STATUS_CROSS_MOVE) ? 1 : 0;
+        $currentSignCode = ($game->status === Game::STATUS_CROSS_MOVE) ? 1 : 2;
         $board[$ceil] = $currentSignCode;
         if ($this->checkWinner($currentSignCode, $board)) {
-            $game->winner = $userId;
+            $game->winner = $user->id;
             $game->status = Game::STATUS_GAME_OVER;
+            $user->victories++;
+            $this->userModel->save($user);
+            $enemyId = ($user->id === $game->cross) ? $game->zero : $game->cross;
+            $enemy = $this->userModel->find($enemyId);
+            $enemy->defeats++;
+            $this->userModel->save($enemy);
         } else if ($this->checkFull($board)) {
             $game->status = Game::STATUS_GAME_OVER;
         } else {
@@ -133,9 +143,9 @@ class GameService
             'status' => $game->status,
             'board' => $board,
             'your_turn' => 
-                    $game->status == Game::STATUS_CROSS_MOVE && $game->cross == $userId ||
-                    $game->status == Game::STATUS_ZERO_MOVE && $game->zero == $userId,
-            'your_sign' => ($game->cross == $userId) ? 'cross' : 'zero'
+                    $game->status == Game::STATUS_CROSS_MOVE && $game->cross == $user->id ||
+                    $game->status == Game::STATUS_ZERO_MOVE && $game->zero == $user->id,
+            'your_sign' => ($game->cross == $user->id) ? 'cross' : 'zero'
         ];
         return $status;
     }

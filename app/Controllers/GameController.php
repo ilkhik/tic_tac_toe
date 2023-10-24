@@ -43,14 +43,15 @@ class GameController extends BaseController
     
     public function move(): ResponseInterface
     {
-        $ceil = $request->ceil;
+        $ceil = $this->request->getJSON()->ceil;
         if ($ceil < 0 || $ceil > 8) {
             return $this->respond([
                 'message' => 'Невалидный номер клетки'
             ], 400);
         }
+        $user = $this->userModel->find($this->request->auth->id);
         try {
-            $gameStatus = $this->gameService->move($request->auth->id, $ceil);
+            $gameStatus = $this->gameService->move($user, $ceil);
         } catch (\InvalidArgumentException $e) {
             return $this->respond([
                 'message' => $e->getMessage()

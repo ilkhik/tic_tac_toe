@@ -19,7 +19,7 @@ class UserService
     {
         return $user->is_online 
                 && Time::now()->subMinutes(5)
-                ->isAfter($user->last_online);
+                ->isBefore($user->last_online);
     }
     
     public function getOnlineUsersCount(): int

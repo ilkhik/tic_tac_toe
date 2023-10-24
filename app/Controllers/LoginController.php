@@ -40,7 +40,7 @@ class LoginController extends BaseController
             ], 400);
         }
         $onlineUsersCount = $this->userService->getOnlineUsersCount();
-        if ($onlineUsersCount >= 2) {
+        if ($onlineUsersCount >= 2 && !$this->userService->isOnline($user)) {
             return $this->respond([
                 'message' => 'Достигнуто максимальное количество игроков. Зайдите позже.'
             ], 400);
