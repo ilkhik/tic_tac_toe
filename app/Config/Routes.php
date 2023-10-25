@@ -2,6 +2,7 @@
 
 use App\Controllers\GameController;
 use App\Controllers\LoginController;
+use App\Controllers\SignUpController;
 use App\Controllers\WebController;
 use App\Filters\JwtFilter;
 use CodeIgniter\Router\RouteCollection;
@@ -18,6 +19,11 @@ $routes->group('api', static function ($routes) {
     $routes->post(
             'login',
             [LoginController::class, 'login']
+    );
+    
+    $routes->post(
+            'sign_up',
+            [SignUpController::class, 'index']
     );
     
     
