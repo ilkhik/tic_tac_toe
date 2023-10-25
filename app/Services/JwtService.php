@@ -19,7 +19,9 @@ class JwtService
         ], $key, 'HS256');
         $refresh = JWT::encode([
             'sub' => $user->id,
-            'username' => $user->username,
+            'refresh_data' => [
+                'username' => $user->username
+            ],
             'exp' => Time::now()->addDays(5)->getTimestamp(),
             'nbf' => Time::now()->addMinutes(5)->getTimestamp()
         ], $key, 'HS256');

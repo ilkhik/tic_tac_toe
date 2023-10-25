@@ -2,15 +2,20 @@
 
 use App\Controllers\GameController;
 use App\Controllers\LoginController;
+use App\Controllers\WebController;
 use App\Filters\JwtFilter;
 use CodeIgniter\Router\RouteCollection;
 
 /**
  * @var RouteCollection $routes
  */
-//$routes->get('/', 'Home::index');
+// WEB routes
+$routes->get('/', [WebController::class, 'index']);
+$routes->get('/login', [WebController::class, 'login']);
+
+// API routes
 $routes->group('api', static function ($routes) {
-    $routes->get(
+    $routes->post(
             'login',
             [LoginController::class, 'login']
     );

@@ -79,7 +79,8 @@ class GameService
                 'status' => null,
                 'board' => null,
                 'your_turn' => null,
-                'your_sign' => null
+                'your_sign' => null,
+                'winner' => null
             ];
         }
         $board = json_decode($game->board);
@@ -89,7 +90,8 @@ class GameService
             'your_turn' => 
                     $game->status == Game::STATUS_CROSS_MOVE && $game->cross == $user->id ||
                     $game->status == Game::STATUS_ZERO_MOVE && $game->zero == $user->id,
-            'your_sign' => ($game->cross == $user->id) ? 'cross' : 'zero'
+            'your_sign' => ($game->cross == $user->id) ? 'cross' : 'zero',
+            'winner' => $game->winner
         ];
         return $status;
     }
@@ -145,7 +147,8 @@ class GameService
             'your_turn' => 
                     $game->status == Game::STATUS_CROSS_MOVE && $game->cross == $user->id ||
                     $game->status == Game::STATUS_ZERO_MOVE && $game->zero == $user->id,
-            'your_sign' => ($game->cross == $user->id) ? 'cross' : 'zero'
+            'your_sign' => ($game->cross == $user->id) ? 'cross' : 'zero',
+            'winner' => $game->winner
         ];
         return $status;
     }

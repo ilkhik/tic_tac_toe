@@ -1,0 +1,23 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    text-align: center;
+}
+
+.board {
+    height: 300px;
+    width: 300px;
+    margin: auto;
+    display: none;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.cell {
+    height: 100px;
+    width: 100px;
+    background-color: #aaa;
+    border: solid #777;
+    font-size: 4em;
+}
