@@ -1,5 +1,3 @@
-let signUp = false;
-
 async function submitLogin() {
     const login = document.getElementById('login').value;
     const password = document.getElementById('password').value;
