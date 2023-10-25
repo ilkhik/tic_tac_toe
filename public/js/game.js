@@ -113,6 +113,8 @@ class Board {
 
 class Server {
     #token;
+    #refreshed;
+    #refreshing;
     
     constructor() {
         this.#token = sessionStorage.getItem('token');
@@ -133,7 +135,7 @@ class Server {
         if (response.ok) {
             return responseData;
         } else if (response.status === 401){
-            this.#refreshToken();
+            await this.#refreshToken();
             const responseAttempt = await this.#fetch(method, uri, data);
             const responseAttemptData = await responseAttempt.json();
             if (responseAttempt.ok) {
@@ -158,6 +160,19 @@ class Server {
     }
     
     async #refreshToken() {
+        if (this.#refreshing) {
+            do {
+                await new Promise((resolve) => {
+                    setTimeout(() => resolve(), 500)
+                });
+            } while (this.#refreshing);
+            return;
+        }
+        if (Date.now() - this.#refreshed < 1000*60*2 || this.#refreshing) {
+            return;
+        }
+        this.#refreshing = true;
+        
         const response = await fetch('/api/refresh_token', {
             method: 'POST',
             headers: {
@@ -168,12 +183,14 @@ class Server {
             })
         });
         if (response.ok) {
-            responseData = await response.json();
+            const responseData = await response.json();
             sessionStorage.setItem('token', responseData.token);
             sessionStorage.setItem('refreshToken', responseData.refresh);
             this.#token = responseData.token;
+            this.#refreshed = Date.now();
         } else {
             location.pathname = '/login';
         }
+        this.#refreshing = false;
     }
 }

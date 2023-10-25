@@ -41,9 +41,17 @@ class JwtFilter implements FilterInterface
             return $response;
         }
         
+        if (!isset($data->data)) {
+            $response = Services::response();
+            $response->setStatusCode(401);
+            $response->setJSON([
+                'message' => 'Invalid token'
+            ]);
+        }
+        
         $request->auth = (object)[
             'id' => $data->sub,
-            'username' => $data->username
+            'username' => $data->data->username
         ];
         return $request;
     }

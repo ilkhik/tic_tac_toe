@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\GameController;
+use App\Controllers\JwtController;
 use App\Controllers\LoginController;
 use App\Controllers\SignUpController;
 use App\Controllers\WebController;
@@ -24,6 +25,11 @@ $routes->group('api', static function ($routes) {
     $routes->post(
             'sign_up',
             [SignUpController::class, 'index']
+    );
+    
+    $routes->post(
+            'refresh_token',
+            [JwtController::class, 'refresh']
     );
     
     
