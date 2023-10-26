@@ -77,8 +77,11 @@ class Game {
             const whoIsMoving = this.#status.your_turn ? 'Ваш ход. ' : 'Ждём хода соперника. ';
             const mySign = (this.#status.your_sign === 'cross') ? 
                                 'Вы ходите крестиком. ' : 
-                                'Вы ходите ноликом.';
-            text = whoIsMoving + mySign;
+                                'Вы ходите ноликом. ';
+            const enemyUsername = this.#status.enemy 
+                                        ? `Соперник: ${this.#status.enemy.username}` 
+                                        : '';
+            text = whoIsMoving + mySign + enemyUsername;
         }
         document.getElementById('status').innerHTML = text;
     }

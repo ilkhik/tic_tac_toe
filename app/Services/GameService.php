@@ -77,9 +77,15 @@ class GameService
                 'board' => null,
                 'your_turn' => null,
                 'your_sign' => null,
-                'winner' => null
+                'winner' => null,
+                'enemy' => null
             ];
         }
+        $enemyId = $game->cross === $user->id ? $game->zero : $game->cross;
+        $enemy = $enemyId ? $this->userModel
+                ->select('id')
+                ->select('username')
+                ->find($enemyId) : null;
         $board = json_decode($game->board);
         $status = [
             'status' => $game->status,
@@ -88,7 +94,8 @@ class GameService
                     $game->status == Game::STATUS_CROSS_MOVE && $game->cross == $user->id ||
                     $game->status == Game::STATUS_ZERO_MOVE && $game->zero == $user->id,
             'your_sign' => ($game->cross == $user->id) ? 'cross' : 'zero',
-            'winner' => $game->winner
+            'winner' => $game->winner,
+            'enemy' => $enemy
         ];
         return $status;
     }

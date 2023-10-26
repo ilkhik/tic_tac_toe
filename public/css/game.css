@@ -37,3 +37,13 @@
     border-radius: 5px;
     cursor: default;
 }
+
+#status {
+    width: 300px;
+    color: #5f6b3b;
+    background-color: #cff0f5;
+    margin: auto;
+    border: solid 1px;
+    border-radius: 5px;
+    cursor: default;
+}
