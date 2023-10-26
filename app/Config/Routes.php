@@ -23,6 +23,12 @@ $routes->group('api', static function ($routes) {
     );
     
     $routes->post(
+            'logout',
+            [LoginController::class, 'logout'],
+            ['filter' => JwtFilter::class]
+    );
+    
+    $routes->post(
             'sign_up',
             [SignUpController::class, 'index']
     );

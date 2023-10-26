@@ -21,3 +21,12 @@
     border: solid #777;
     font-size: 4em;
 }
+
+#logout {
+    background-color: #ddd;
+    width: 60px;
+    margin: auto;
+    border: solid 1px;
+    border-radius: 5px;
+    cursor: default;
+}

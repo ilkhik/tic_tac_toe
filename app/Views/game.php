@@ -9,6 +9,7 @@
     </head>
     <body>
         <div class="content">
+            <div id="logout">Выйти</div>
             <div id="user-info">
                 Имя пользователя: <span id="username"></span><br>
                 Количество побед: <span id="victory-count"></span><br>

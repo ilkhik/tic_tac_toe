@@ -7,6 +7,7 @@ use App\Models\UserModel;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
+use Config\Database;
 use Services\GameService;
 use Services\JwtService;
 use Services\UserService;
@@ -17,11 +18,13 @@ class LoginController extends BaseController
     
     private GameService $gameService;
     private UserService $userService;
-    
+    private UserModel $userModel;
+
     public function __construct()
     {
         $this->gameService = new GameService();
         $this->userService = new UserService();
+        $this->userModel = new UserModel();
     }
     
     public function login(): ResponseInterface
@@ -55,5 +58,22 @@ class LoginController extends BaseController
         $tokens = $jwtService->generateJwtForUser($user);
         
         return $this->respond($tokens);
+    }
+    
+    public function logout(): ResponseInterface
+    {
+        $user = $this->userModel->find($this->request->auth->id);
+        $user->is_online = false;
+        $user->last_online = Time::now();
+        $this->userModel->save($user);
+        
+        $db = Database::connect();
+        $db->table('refresh_tokens')
+                ->where('token', $this->request->getJSON()->refresh)
+                ->delete();
+        
+        return $this->respond([
+            'message' => 'ok'
+        ]);
     }
 }

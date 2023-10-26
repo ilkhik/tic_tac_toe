@@ -9,6 +9,12 @@ class Game {
     #status;
     
     constructor() {
+        document.getElementById('logout').onclick = async () => {
+            await this.#server.logout();
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            location.pathname = '/login';
+        };
         this.#board = new Board();
         this.#server = new Server();
         
@@ -126,6 +132,12 @@ class Server {
     
     getUserInfo() {
         return this.#sendRequest('GET', '/api/game/user_info');
+    }
+    
+    logout() {
+        return this.#sendRequest('POST', '/api/logout', {
+            refresh: localStorage.getItem('refreshToken')
+        });
     }
     
     async #sendRequest(method, uri, data) {
