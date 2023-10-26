@@ -23,14 +23,18 @@ class Game {
                 this.updateStatusUI();
             }
         });
-        this.#server = new Server();
+        this.#server = new Server(userInfo => {
+            this.#user_info = userInfo;
+            this.updateUserInfoUI();
+        }, status => {
+            this.#status = status;
+            this.#board.cells = this.#status.board;
+            this.#board.updateUI();
+            this.updateStatusUI();
+        });
         
         this.updateUserInfo();
         this.updateStatus();
-        setInterval(() => {
-            this.updateStatus();
-            this.updateUserInfo();
-        }, 3000);
         document.getElementById('start-new-game').onclick = () => this.startNewGame();
     }
     
@@ -143,10 +147,29 @@ class Board {
 class Server {
     #token;
     #refreshed;
+    /**
+     * 
+     * @type Boolean
+     */
     #refreshing;
+    /**
+     * 
+     * @type function
+     * @param {object} userInfo 
+     */
+    #userInfoUpdateCallback;
+    /**
+     * 
+     * @type function
+     * @param {Object} status 
+     */
+    #statusUpdateCallback;
     
-    constructor() {
+    constructor(userInfoUpdateCallback, statusUpdateCallback) {
         this.#token = localStorage.getItem('token');
+        this.#userInfoUpdateCallback = userInfoUpdateCallback;
+        this.#statusUpdateCallback = statusUpdateCallback;
+        this.startListening();
     }
     
     getStatus() {
@@ -231,6 +254,23 @@ class Server {
             location.pathname = '/login';
         }
         this.#refreshing = false;
+    }
+    
+    async startListening() {
+        // TODO
+        
+        if (this.#userInfoUpdateCallback) {
+            setInterval(async () => {
+                const userInfo = await this.getUserInfo();
+                this.#userInfoUpdateCallback(userInfo);
+            }, 2000);
+        }
+        if (this.#statusUpdateCallback) {
+            setInterval(async () => {
+                const status = await this.getStatus();
+                this.#statusUpdateCallback(status);
+            }, 2000);
+        }
     }
 }
 
