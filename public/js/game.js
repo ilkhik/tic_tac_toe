@@ -15,11 +15,21 @@ class Game {
             localStorage.removeItem('refreshToken');
             location.pathname = '/login';
         };
-        this.#board = new Board();
+        this.#board = new Board(async clickedCell => {
+            if (this.#status.your_turn) {
+                this.#status = await this.#server.turn(clickedCell);
+                this.#board.cells = this.#status.board;
+                this.#board.updateUI();
+                this.updateStatusUI();
+            }
+        });
         this.#server = new Server();
         
         this.updateUserInfo();
         this.updateStatus();
+        setInterval(() => {
+            this.updateStatus();
+        }, 3000);
     }
     
     updateUserInfo() {
@@ -35,21 +45,23 @@ class Game {
         document.getElementById('defeat-count').innerHTML = this.#user_info.defeats;
     }
     
-    updateStatus() {
-        this.#server.getStatus().then((data) => {
-            this.#status = data;
-            this.#board.cells = this.#status.board;
-            this.#board.updateUI();
-            this.updateStatusUI();
-        });
+    async updateStatus() {
+        const data = await this.#server.getStatus();
+        this.#status = data;
+        this.#board.cells = this.#status.board;
+        this.#board.updateUI();
+        this.updateStatusUI();
     }
     
     updateStatusUI() {
         // TODO
         let text = '';
+        const boardElement = document.getElementById('board');
         if (this.#status.status === 'waiting') {
+            boardElement.style.display = 'none';
             text = 'Ожидаем присоединения соперника';
         } else if (this.#status.status === 'game_over') {
+            boardElement.style.display = 'flex';
             if (this.#status.winner === this.#user_info.id) {
                 text = 'Вы победили!';
             } else if (this.#status.winner !== null) {
@@ -58,10 +70,11 @@ class Game {
                 text = 'Ничья!';
             }
         } else {
+            boardElement.style.display = 'flex';
             const whoIsMoving = this.#status.your_turn ? 'Ваш ход. ' : 'Ждём хода соперника. ';
             const mySign = (this.#status.your_sign === 'cross') ? 
                                 'Вы ходите крестиком. ' : 
-                                'Вы ходите ноликом';
+                                'Вы ходите ноликом.';
             text = whoIsMoving + mySign;
         }
         document.getElementById('status').innerHTML = text;
@@ -73,13 +86,13 @@ class Board {
     #cellElements;
     cells;
     
-    constructor() {
+    constructor(clickToCellCallback) {
         this.#boardElement = document.getElementById('board');
         this.#cellElements = this.#boardElement.children;
         this.cells = Array(9).fill(0);
         for (let i = 0; i < 9; i++) {
             this.#cellElements[i].onclick = () => {
-                this.clickCell(i);
+                clickToCellCallback(i);
             };
         }
     }
@@ -91,11 +104,6 @@ class Board {
     clear() {
         this.cells.fill(0);
         this.updateUI();
-    }
-    
-    clickCell(n) {
-        // TODO
-        console.log(`clicked: ${n}`);
     }
     
     updateUI() {
@@ -140,6 +148,10 @@ class Server {
         });
     }
     
+    turn(ceil) {
+        return this.#sendRequest('POST', '/api/game/move', {ceil});
+    }
+    
     async #sendRequest(method, uri, data) {
         const response = await this.#fetch(method, uri, data);
         
@@ -172,15 +184,11 @@ class Server {
     }
     
     async #refreshToken() {
-        if (this.#refreshing) {
-            do {
-                await new Promise((resolve) => {
-                    setTimeout(() => resolve(), 500)
-                });
-            } while (this.#refreshing);
+        while (this.#refreshing) {
+            await sleep(100);
             return;
         }
-        if (Date.now() - this.#refreshed < 1000*60*2 || this.#refreshing) {
+        if (Date.now() - this.#refreshed < 1000*60*2) {
             return;
         }
         this.#refreshing = true;
@@ -205,4 +213,8 @@ class Server {
         }
         this.#refreshing = false;
     }
+}
+
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(() => resolve()), ms);
 }
