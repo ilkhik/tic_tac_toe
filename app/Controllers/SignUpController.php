@@ -51,7 +51,7 @@ class SignUpController extends BaseController
         $this->userModel->save($user);
         $user->id = $this->userModel->getInsertID();
         
-        $this->gameService->passUserToGame($user);
+        $this->gameService->startNewGame($user);
         
         $jwtService = new JwtService();
         $tokens = $jwtService->generateJwtForUser($user);

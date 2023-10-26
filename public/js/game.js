@@ -29,7 +29,9 @@ class Game {
         this.updateStatus();
         setInterval(() => {
             this.updateStatus();
+            this.updateUserInfo();
         }, 3000);
+        document.getElementById('start-new-game').onclick = () => this.startNewGame();
     }
     
     updateUserInfo() {
@@ -62,6 +64,7 @@ class Game {
             text = 'Ожидаем присоединения соперника';
         } else if (this.#status.status === 'game_over') {
             boardElement.style.display = 'flex';
+            document.getElementById('start-new-game').hidden = false;
             if (this.#status.winner === this.#user_info.id) {
                 text = 'Вы победили!';
             } else if (this.#status.winner !== null) {
@@ -78,6 +81,15 @@ class Game {
             text = whoIsMoving + mySign;
         }
         document.getElementById('status').innerHTML = text;
+    }
+    
+    async startNewGame() {
+        const data = await this.#server.startNewGame();
+        this.#status = data;
+        this.#board.cells = this.#status.board;
+        this.#board.updateUI();
+        this.updateStatusUI();
+        document.getElementById('start-new-game').hidden = true;
     }
 }
 
@@ -150,6 +162,10 @@ class Server {
     
     turn(ceil) {
         return this.#sendRequest('POST', '/api/game/move', {ceil});
+    }
+    
+    startNewGame() {
+        return this.#sendRequest('POST', '/api/game/start');
     }
     
     async #sendRequest(method, uri, data) {

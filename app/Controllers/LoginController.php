@@ -52,7 +52,7 @@ class LoginController extends BaseController
         $user->last_online = Time::now();
         $userModel->save($user);
         
-        $this->gameService->passUserToGame($user);
+        $this->gameService->startNewGame($user);
         
         $jwtService = new JwtService();
         $tokens = $jwtService->generateJwtForUser($user);

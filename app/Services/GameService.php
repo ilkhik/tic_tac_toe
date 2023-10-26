@@ -20,7 +20,7 @@ class GameService
         $this->userService = new UserService();
     }
     
-    public function passUserToGame(User $user): void
+    public function startNewGame(User $user): void
     {
         $game = $this->gameModel
                 ->where('status <>', Game::STATUS_GAME_OVER)
@@ -66,11 +66,8 @@ class GameService
     public function getGameStatusForUser(int $userId)
     {
         $user = $this->userModel->find($userId);
-        $game = $this->gameModel->where("
-                    status <> '" . Game::STATUS_GAME_OVER . "'
-                    and
-                    (cross = {$user->id} or zero = {$user->id})
-                ")
+        $game = $this->gameModel->where('cross', $user->id)
+                ->orWhere('zero', $user->id)
                 ->orderBy('id', 'desc')
                 ->first();
 

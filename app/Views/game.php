@@ -15,9 +15,8 @@
                 Количество побед: <span id="victory-count"></span><br>
                 Количество поражений: <span id="defeat-count"></span>
             </div>
-            <div id="status">
-                
-            </div>
+            <div id="status"></div>
+            <div id="start-new-game" hidden>Начать новую игру</div>
             <div class="board" id="board">
                 <button class="cell"></button>
                 <button class="cell"></button>

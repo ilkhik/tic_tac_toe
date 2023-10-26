@@ -57,5 +57,11 @@ $routes->group('api', static function ($routes) {
             ['filter' => JwtFilter::class]
     );
     
+    $routes->post(
+            'game/start',
+            [GameController::class, 'start'],
+            ['filter' => JwtFilter::class]
+    );
+    
 });
 

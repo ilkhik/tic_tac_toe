@@ -24,7 +24,14 @@
 
 #logout {
     background-color: #ddd;
-    width: 60px;
+    margin: auto;
+    border: solid 1px;
+    border-radius: 5px;
+    cursor: default;
+}
+
+#start-new-game {
+    background-color: #ddd;
     margin: auto;
     border: solid 1px;
     border-radius: 5px;

@@ -59,4 +59,12 @@ class GameController extends BaseController
         }
         return $this->respond($gameStatus);
     }
+    
+    public function start(): ResponseInterface
+    {
+        $user = $this->userModel->find($this->request->auth->id);
+        $this->gameService->startNewGame($user);
+        $response = $this->gameService->getGameStatusForUser($user->id);
+        return $this->respond($response);
+    }
 }
