@@ -188,7 +188,7 @@ class Server {
             await sleep(100);
             return;
         }
-        if (Date.now() - this.#refreshed < 1000*60*2) {
+        if (this.#refreshed && Date.now() - this.#refreshed < 1000*60*2) {
             return;
         }
         this.#refreshing = true;
