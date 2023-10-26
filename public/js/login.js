@@ -18,8 +18,8 @@ async function submitLogin() {
     });
     const result = await response.json();
     if (response.ok) {
-        sessionStorage.setItem('token', result.token);
-        sessionStorage.setItem('refreshToken', result.refresh);
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('refreshToken', result.refresh);
         location.pathname = '/';
     } else {
         errorTextElement.innerHTML = result.message;
@@ -47,8 +47,8 @@ async function submitSignUp() {
     });
     const result = await response.json();
     if (response.ok) {
-        sessionStorage.setItem('token', result.token);
-        sessionStorage.setItem('refreshToken', result.refresh);
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('refreshToken', result.refresh);
         location.pathname = '/';
     } else {
         errorTextElement.innerHTML = result.message;

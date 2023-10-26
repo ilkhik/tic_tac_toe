@@ -117,7 +117,7 @@ class Server {
     #refreshing;
     
     constructor() {
-        this.#token = sessionStorage.getItem('token');
+        this.#token = localStorage.getItem('token');
     }
     
     getStatus() {
@@ -179,13 +179,13 @@ class Server {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                refresh: sessionStorage.getItem('refreshToken')
+                refresh: localStorage.getItem('refreshToken')
             })
         });
         if (response.ok) {
             const responseData = await response.json();
-            sessionStorage.setItem('token', responseData.token);
-            sessionStorage.setItem('refreshToken', responseData.refresh);
+            localStorage.setItem('token', responseData.token);
+            localStorage.setItem('refreshToken', responseData.refresh);
             this.#token = responseData.token;
             this.#refreshed = Date.now();
         } else {

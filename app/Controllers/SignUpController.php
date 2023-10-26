@@ -9,6 +9,7 @@ use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\I18n\Time;
 use Services\GameService;
 use Services\JwtService;
+use Services\UserService;
 
 class SignUpController extends BaseController
 {
@@ -16,16 +17,24 @@ class SignUpController extends BaseController
     
     private UserModel $userModel;
     private GameService $gameService;
+    private UserService $userService;
     
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->gameService = new GameService();
+        $this->userService = new UserService();
     }
 
 
     public function index()
     {
+        $onlineUsersCount = $this->userService->getOnlineUsersCount();
+        if ($onlineUsersCount >= 2) {
+            return $this->respond([
+                'message' => 'Достигнуто максимальное количество игроков. Зайдите позже.'
+            ], 400);
+        }
         $request = $this->request->getJSON();
         $user = new User();
         $user->username = $request->login;
