@@ -6,7 +6,9 @@ use App\Controllers\BaseController;
 use App\Models\UserModel;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
+use InvalidArgumentException;
 use Services\GameService;
+use Services\UserService;
 
 class GameController extends BaseController
 {
@@ -14,11 +16,14 @@ class GameController extends BaseController
     
     private UserModel $userModel;
     private GameService $gameService;
-    
+    private UserService $userService;
+
+
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->gameService = new GameService();
+        $this->userService = new UserService();
     }
 
 
@@ -29,16 +34,9 @@ class GameController extends BaseController
     
     public function userInfo(): ResponseInterface
     {
-        $currentUserData = $this->request->auth;
-        $user = $this->userModel->find($currentUserData->id);
-        
-        $response = [
-            'id' => $user->id,
-            'username' => $user->username,
-            'victories' => $user->victories,
-            'defeats' => $user->defeats,
-        ];
-        return $this->respond($response);
+        $userId = $this->request->auth->id;
+        $info = $this->userService->getInfo($userId);
+        return $this->respond($info);
     }
     
     public function move(): ResponseInterface
@@ -52,7 +50,7 @@ class GameController extends BaseController
         $user = $this->userModel->find($this->request->auth->id);
         try {
             $gameStatus = $this->gameService->move($user, $ceil);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return $this->respond([
                 'message' => $e->getMessage()
             ], 400);

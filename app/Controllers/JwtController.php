@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\HTTP\ResponseInterface;
 use InvalidArgumentException;
 use Services\JwtService;
 
@@ -28,5 +29,13 @@ class JwtController extends BaseController
                 'message' => $e->getMessage()
             ], 400);
         }
+    }
+    
+    public function getWsJwt(): ResponseInterface
+    {
+        return $this
+                ->respond($this
+                        ->jwtService
+                        ->getWsJwt($this->request->auth->id));
     }
 }

@@ -12,12 +12,14 @@ class GameService
     private GameModel $gameModel;
     private UserModel $userModel;
     private UserService $userService;
+    private WebsocketService $websocketService;
 
     public function __construct()
     {
         $this->gameModel = new GameModel();
         $this->userModel = new UserModel();
         $this->userService = new UserService();
+        $this->websocketService = new WebsocketService();
     }
     
     public function startNewGame(User $user): void
@@ -59,7 +61,8 @@ class GameService
             $game->status = Game::STATUS_CROSS_MOVE;
             $this->gameModel->save($game);
             
-            //TODO notify the enemy
+            $enemyStatus = $this->getGameStatusForUser($enemy->id);
+            $this->websocketService->updateStatus($enemy->id, $enemyStatus);
         }
     }
     
@@ -119,6 +122,7 @@ class GameService
             ) {
             throw new \InvalidArgumentException('Сейчас не ваш ход');
         }
+        $enemyId = ($user->id === $game->cross) ? $game->zero : $game->cross;
         
         $board = json_decode($game->board);
         if ($board[$ceil] !== 0) {
@@ -131,7 +135,6 @@ class GameService
             $game->status = Game::STATUS_GAME_OVER;
             $user->victories++;
             $this->userModel->save($user);
-            $enemyId = ($user->id === $game->cross) ? $game->zero : $game->cross;
             $enemy = $this->userModel->find($enemyId);
             $enemy->defeats++;
             $this->userModel->save($enemy);
@@ -144,6 +147,14 @@ class GameService
         }
         $game->board = json_encode($board);
         $this->gameModel->save($game);
+        
+        $enemyStatus = $this->getGameStatusForUser($enemyId);
+        $this->websocketService->updateStatus($enemyId, $enemyStatus);
+        $enemyUserInfo = $this->userService->getInfo($enemyId);
+        $this->websocketService->updateUserInfo($enemyId, $enemyUserInfo);
+        
+        $userInfo = $this->userService->getInfo($user->id);
+        $this->websocketService->updateUserInfo($user->id, $userInfo);
         
         $status = [
             'status' => $game->status,

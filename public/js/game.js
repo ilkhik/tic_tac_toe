@@ -164,6 +164,12 @@ class Server {
      * @param {Object} status 
      */
     #statusUpdateCallback;
+    #wxEnabled;
+    /**
+     * 
+     * @type array
+     */
+    #timers = [];
     
     constructor(userInfoUpdateCallback, statusUpdateCallback) {
         this.#token = localStorage.getItem('token');
@@ -257,20 +263,70 @@ class Server {
     }
     
     async startListening() {
-        // TODO
+        this.startListeningWs();
+        this.changeMode(false);
+    }
+    
+    changeMode(wsEnabled) {
+        for (const timer of this.#timers) {
+            clearTimeout(timer);
+        }
+        this.#timers = [];
+        if (!wsEnabled) {
+            if (this.#userInfoUpdateCallback) {
+                this.#timers.push(setInterval(async () => {
+                    const userInfo = await this.getUserInfo();
+                    this.#userInfoUpdateCallback(userInfo);
+                }, 2000));
+            }
+            if (this.#statusUpdateCallback) {
+                this.#timers.push(setInterval(async () => {
+                    const status = await this.getStatus();
+                    this.#statusUpdateCallback(status);
+                }, 2000));
+            }
+        }
+    }
+    
+    async startListeningWs() {
+        while (!this.#token) {
+            await sleep(50);
+        }
+        const token = await this.#sendRequest('GET', '/api/ws_jwt');
+        const centrifuge = new Centrifuge(`ws://${location.hostname}:8000/connection/websocket`, {
+          token: token.token
+        });
         
-        if (this.#userInfoUpdateCallback) {
-            setInterval(async () => {
-                const userInfo = await this.getUserInfo();
-                this.#userInfoUpdateCallback(userInfo);
-            }, 2000);
-        }
-        if (this.#statusUpdateCallback) {
-            setInterval(async () => {
-                const status = await this.getStatus();
-                this.#statusUpdateCallback(status);
-            }, 2000);
-        }
+        centrifuge.on('connecting', function (ctx) {
+          console.log(`connecting: ${ctx.code}, ${ctx.reason}`);
+        }).on('connected', function (ctx) {
+          console.log(`connected over ${ctx.transport}`);
+        }).on('disconnected', ctx => {
+          console.log(`disconnected: ${ctx.code}, ${ctx.reason}`);
+          this.changeMode(false);
+        }).connect();
+
+        const sub = centrifuge.newSubscription(`user#${token.id}`);
+
+        sub.on('publication', (ctx) => {
+          console.log(ctx.data);
+          const data = ctx.data;
+          switch (data.action) {
+              case 'updateStatus':
+                  this.#statusUpdateCallback(data.data);
+                  break;
+              case 'updateUserInfo':
+                  this.#userInfoUpdateCallback(data.data);
+                  break;
+          }
+        }).on('subscribing', function (ctx) {
+          console.log(`subscribing: ${ctx.code}, ${ctx.reason}`);
+        }).on('subscribed', ctx => {
+          console.log('subscribed', ctx);
+          this.changeMode(true);
+        }).on('unsubscribed', function (ctx) {
+          console.log(`unsubscribed: ${ctx.code}, ${ctx.reason}`);
+        }).subscribe();
     }
 }
 

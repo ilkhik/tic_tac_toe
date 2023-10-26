@@ -38,6 +38,12 @@ $routes->group('api', static function ($routes) {
             [JwtController::class, 'refresh']
     );
     
+    $routes->get(
+            'ws_jwt',
+            [JwtController::class, 'getWsJwt'],
+            ['filter' => JwtFilter::class]
+    );
+    
     
     $routes->get(
             'game/status',

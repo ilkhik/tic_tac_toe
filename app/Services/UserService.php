@@ -37,4 +37,16 @@ class UserService
                 ->where('last_online >', Time::now()->subMinutes(5))
                 ->get();
     }
+    
+    public function getInfo(int $userId)
+    {
+        $user = $this->userModel->find($userId);
+        
+        return [
+            'id' => $user->id,
+            'username' => $user->username,
+            'victories' => $user->victories,
+            'defeats' => $user->defeats,
+        ];
+    }
 }

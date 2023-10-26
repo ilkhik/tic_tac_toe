@@ -23,14 +23,14 @@ class JwtService
     {
         $key = getenv('JWT_KEY');
         $token = JWT::encode([
-            'sub' => $user->id,
+            'sub' => (string)$user->id,
             'data' => [
                 'username' => $user->username,
             ],
             'exp' => Time::now()->addMinutes(5)->getTimestamp()
         ], $key, 'HS256');
         $refresh = JWT::encode([
-            'sub' => $user->id,
+            'sub' => (string)$user->id,
             'refresh_data' => [
                 'username' => $user->username
             ],
@@ -77,5 +77,18 @@ class JwtService
                 ->delete();
         
         return $this->generateJwtForUser($user);
+    }
+    
+    public function getWsJwt(int $userId)
+    {
+        $key = getenv('JWT_KEY');
+        $token = JWT::encode([
+            'sub' => (string)$userId,
+            'exp' => Time::now()->addDays(3)->getTimestamp()
+        ], $key, 'HS256');
+        return [
+            'id' => $userId,
+            'token' => $token
+        ];
     }
 }
