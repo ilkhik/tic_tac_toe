@@ -11,6 +11,12 @@ use Throwable;
 
 class JwtFilter implements FilterInterface
 {
+    private \Services\UserService $userService;
+    
+    public function __construct()
+    {
+        $this->userService = new \Services\UserService();
+    }
     /**
      * Do whatever processing this filter needs to do.
      * By default it should not return anything during
@@ -48,6 +54,8 @@ class JwtFilter implements FilterInterface
                 'message' => 'Invalid token'
             ]);
         }
+        
+        $this->userService->updateOnline(intval($data->sub));
         
         $request->auth = (object)[
             'id' => $data->sub,

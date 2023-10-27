@@ -5,6 +5,7 @@ namespace Services;
 use App\Entities\User;
 use App\Models\UserModel;
 use CodeIgniter\I18n\Time;
+use Config\Database;
 
 class UserService
 {
@@ -48,5 +49,14 @@ class UserService
             'victories' => $user->victories,
             'defeats' => $user->defeats,
         ];
+    }
+    
+    public function updateOnline(int $userId)
+    {
+        Database::connect()->table('users')->where('id', $userId)
+                ->update([
+                    'is_online' => true,
+                    'last_online' => Time::now()
+                ]);
     }
 }
