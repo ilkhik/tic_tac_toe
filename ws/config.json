@@ -1,0 +1,10 @@
+{
+  "token_hmac_secret_key": "b977ffb4-0d99-4975-a42e-77bdb6774313",
+  "admin_password": "0a65a008-1896-4964-86c2-19f5697ccff7",
+  "admin_secret": "fe0c0b4a-eb16-4288-9ff4-1faeb67ca570",
+  "api_key": "85be7c08-c120-48d9-8876-23e3d9886032",
+  "allowed_origins": ["*"],
+  "allow_subscribe_for_client": true,
+  "allow_user_limited_channels": true,
+  "port": 31492
+}

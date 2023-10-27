@@ -293,7 +293,7 @@ class Server {
             await sleep(50);
         }
         const token = await this.#sendRequest('GET', '/api/ws_jwt');
-        const centrifuge = new Centrifuge(`ws://${location.hostname}:8000/connection/websocket`, {
+        const centrifuge = new Centrifuge(`ws://${location.hostname}:31492/connection/websocket`, {
           token: token.token
         });
         

@@ -1,4 +1,6 @@
 JWT_KEY = b977ffb4-0d99-4975-a42e-77bdb6774313
+WS_API_KEY = 85be7c08-c120-48d9-8876-23e3d9886032
+WS_API_URL = 'http://localhost:31492/api'
 
 #--------------------------------------------------------------------
 # Example Environment Configuration file
