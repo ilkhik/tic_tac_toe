@@ -1,9 +1,17 @@
 # Деплой
+Устанавливаем зависимости
+```
+composer install
+```
 Копируем файл **env** в **.env**
 ```
 cp env .env
 ```
-В **.env** вводим настройки подключения к БД. Запуск на порту 8080:
+В **.env** вводим настройки подключения к БД. Запускаем миграции:
+```
+php spark migrate
+```
+Запуск на порту 8080:
 ```
 php spark serve
 ```
@@ -12,5 +20,5 @@ php spark serve
 ```
 ws/centrifugo -c ws/config.json # В Linux
 
-ws/centrifugo.exe -c ws/config.json :: В Windows
+ws/centrifugo.exe -c ws/config.json # В Windows
 ```
